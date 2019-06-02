@@ -6,6 +6,8 @@ import argparse
 from imutils import face_utils
 from scipy.spatial import distance
 
+from align import align
+from search import search
 
 # a landmark predictor that should be downloaded from dlib
 MARK_DETECT_PATH = 'shape_predictor_68_face_landmarks.dat'
@@ -77,18 +79,32 @@ def detect_blink(img):
             cv.drawContours(img, [right_eye_hull], -1, green, 1)
     
     return img
+
+def matchface(img, domain):
+    shift = lambda ps, a: tuple(map(lambda p: tuple(p-ps[0]+a), np.array(ps)))
+    safe = lambda pts, rang: tuple([min(max(x, 0), X) for (x, X) in zip(pts, rang[::-1])])
+    faces = face_detect(img, 1)
+    for rect in faces:
+        pts = [safe(pt, img.shape[:2]) for pt in rect2pts(rect)]
+        cv.rectangle(img, *pts, green, 1) # draw rectangle on img
+        face = img[pts[0][1]:pts[1][1], pts[0][0]:pts[1][0]]
+        alignment = search(face, domain)
+        cv.rectangle(domain, *shift(pts, alignment), green, 1) # draw rectangle on domain
+    return img, domain
             
-
-
 def main():
     base = cv.imread(args['base'])
-    #cv.imwrite('../out/close_out.jpg', mark(base))
-    cv.imwrite('../out/close_blink.jpg', detect_blink(base))
+    #cv.imwrite(args['base'].replace('in/','out/'), mark(base))
+    #cv.imwrite('../out/close_blink.jpg', detect_blink(base))
 
     eye = cv.imread(args['eye'])
-    #cv.imwrite('../out/open_out.jpg', mark(eye))
-    cv.imwrite('../out/open_blink.jpg', detect_blink(eye))
+    #eye = align(cv.imread(args['eye']), base)
+    #cv.imwrite(args['eye'].replace('in/','out/'), mark(eye))
+    #cv.imwrite('../out/open_blink.jpg', detect_blink(eye))
 
+    b, e = matchface(base, eye)
+    cv.imwrite(args['base'].replace('in/','out/'), b)
+    cv.imwrite(args['eye'].replace('in/','out/'), e)
     
 
 if __name__ == '__main__':

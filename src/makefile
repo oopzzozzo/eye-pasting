@@ -4,13 +4,13 @@ IN=../in/
 OUT=../out/
 
 dirs=$(IN) $(OUT)
-targets=$(subst _o, _out, $(IN)%_o.jpg)
+targets=$(subst _o,_out, $(wildcard $(IN)*_o.jpg))
 all: $(dirs) $(subst $(IN), $(OUT), $(targets))
 
 $(dirs):
 	mkdir $@
 $(OUT)%_out.jpg: $(IN)%_c.jpg $(IN)%_o.jpg
-	python3 main.py -b $^ -e $(word 2,$^) -o $@
+	python3 main.py -b $< -e $(word 2,$^) -o $@
 
 clean:
 	rm $(OUT)/*
