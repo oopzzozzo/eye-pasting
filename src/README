@@ -3,17 +3,19 @@
 # Name: 陳郁棋、葛家聿
 # ID #: r07942075, b05902041
 # email: r07942075@ntu.edu.tw b05902041@ntu.edu.tw
-# runs on Ubuntu 18.04 with python version 3.6.7
+# runs on Ubuntu 18.04 with python version 3.6.8
 
 Run the tool
-> python3 main.py [-b base_img_path] [-e open_eye_img_path] [-o output_img_path]
+> python3 main.py [-b base_img_path] [-e open_eye_img_path] [-o output_img_path] [-a]
 # Requires face marking model
+# -a indicates that the two images are taken in different scenarios
 
 Download face marking model
 > make download_model
 
 Download >40 pairs of testing image from CSIE workstation to directory in/.
 > make download_data
+# Requires CSIE workstation account
 
 Run over all image pairs in directory in/
 > make all
