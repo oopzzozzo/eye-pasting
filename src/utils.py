@@ -12,6 +12,7 @@ dp_idx = 33
 # helper fuctions to cast cv2 among dlib
 rect2pts = lambda rect: ((rect.left(), rect.top()), (rect.right(), rect.bottom()))
 shape2pts = lambda shape: list(map(lambda i: (shape.part(i).x, shape.part(i).y), range(68)))
+tp2pts = lambda tp: ((tp[0], tp[1]), (tp[0]+tp[2], tp[1]+tp[3]))
 pts2rect = lambda pts: dlib.rectangle(*pts[0], *pts[1])
 
 # pts functions
