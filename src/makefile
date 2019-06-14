@@ -9,7 +9,7 @@ all: $(dirs) $(subst $(IN), $(OUT), $(targets))
 
 $(dirs):
 	mkdir $@
-$(OUT)%_out.jpg: $(IN)%_c.jpg $(IN)%_o.jpg
+$(OUT)%_out.jpg: $(IN)%_c.jpg $(IN)%_o.jpg main.py
 	python3 main.py -b $< -e $(word 2,$^) -o $@
 
 clean:

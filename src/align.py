@@ -6,23 +6,14 @@ import cv2 as cv
 import numpy as np
 
 
-MAX_FEATURES = 3000
-GOOD_MATCH_PERCENT = 0.10
+MAX_FEATURES = 500
+GOOD_MATCH_PERCENT = 0.15
 
-fshape = lambda s:tuple(map(lambda x:(int(x*0.005)*2+1), s[:2]))
-
-def align(im1, im2):
-
-    # Convert images to grayscale
-    im1Gray = cv.cvtColor(im1, cv.COLOR_BGR2GRAY)
-    im2Gray = cv.cvtColor(im2, cv.COLOR_BGR2GRAY)
-    im1Gray = cv.GaussianBlur(im1Gray, fshape(im1.shape), 0)
-    im2Gray = cv.GaussianBlur(im2Gray, fshape(im2.shape), 0)
-
+def get_homo(src, dest):
     # Detect ORB features and compute descriptors.
     orb = cv.ORB_create(MAX_FEATURES)
-    keypoints1, descriptors1 = orb.detectAndCompute(im1Gray, None)
-    keypoints2, descriptors2 = orb.detectAndCompute(im2Gray, None)
+    keypoints1, descriptors1 = orb.detectAndCompute(src, None)
+    keypoints2, descriptors2 = orb.detectAndCompute(dest, None)
 
     # Match features.
     matcher = cv.DescriptorMatcher_create(cv.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
@@ -36,7 +27,7 @@ def align(im1, im2):
     matches = matches[:numGoodMatches]
 
     # Draw top matches
-    imMatches = cv.drawMatches(im1, keypoints1, im2, keypoints2, matches, None)
+    imMatches = cv.drawMatches(src, keypoints1, dest, keypoints2, matches, None)
     cv.imwrite("matches.jpg", imMatches)
 
     # Extract location of good matches
@@ -47,11 +38,12 @@ def align(im1, im2):
         points1[i, :] = keypoints1[match.queryIdx].pt
         points2[i, :] = keypoints2[match.trainIdx].pt
 
-    # Find homography
-    h, mask = cv.findHomography(points1, points2, cv.RANSAC)
-
-    # Use homography
-    height, width, channels = im2.shape
-    im1Reg = cv.warpPerspective(im1, h, (width, height))
-
-    return im1Reg
+    try:
+        return cv.findHomography(points1, points2, cv.RANSAC)[0]
+    except:
+        return None
+        
+def align(src, dest, **kwargs):
+    homo = kwargs.get('homo', get_homo(src, dest))
+    height, width, channels = dest.shape
+    return cv.warpPerspective(src, homo, (width, height)) if homo is not None else src
