@@ -60,4 +60,6 @@ def main():
     
 
 if __name__ == '__main__':
+    if cv.__version__ != '4.1.0':
+        print("Warning: version of openCV should be 4.1.0")
     main()
